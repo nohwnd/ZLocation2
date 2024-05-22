@@ -263,9 +263,11 @@ function Clear-NonExistentZLocation {
     }
 }
 
-Get-FrequentFolders | ForEach-Object {
-    if (Test-Path $_) {
-        Add-ZWeight -Path $_ -Weight 0
+if ($args -notcontains "NoFrequentFolders") {
+    Get-FrequentFolders | ForEach-Object {
+        if (Test-Path $_) {
+            Add-ZWeight -Path $_ -Weight 0
+        }
     }
 }
 
