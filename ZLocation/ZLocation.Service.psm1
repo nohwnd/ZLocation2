@@ -3,6 +3,9 @@ Set-StrictMode -Version Latest
 Import-Module -Prefix DB (Join-Path $PSScriptRoot 'ZLocation.LiteDB.psd1')
 
 class Service {
+
+    Service () {}
+
     [Collections.Generic.IEnumerable[Location]] Get() {
         return (dboperation {
             # Return an enumerator of all location entries
@@ -52,6 +55,8 @@ class Service {
 }
 
 class Location {
+    Location() {}
+
     [LiteDB.BsonId()]
     [string] $path;
 
