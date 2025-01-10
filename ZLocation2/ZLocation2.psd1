@@ -19,7 +19,7 @@ Copyright = '(c) 2025 nohwnd. All rights reserved.'
 Description = 'ZLocation2 is the new Zlocation. A `cd` that learns.'
 
 # Minimum version of the Windows PowerShell engine required by this module
-PowerShellVersion = '5'
+PowerShellVersion = '5.1.0'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''
