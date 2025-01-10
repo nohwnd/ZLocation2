@@ -4,7 +4,7 @@ Describe 'Find-Matches filters results correctly' {
             $script:IsWindows = $true
         }
 
-        ${function:Find-Matches} = & (Get-Module ZLocation) { Get-Command Find-Matches -Module ZLocation } 
+        ${function:Find-Matches} = & (Get-Module ZLocation2) { Get-Command Find-Matches -Module ZLocation2 } 
     }
 
     Context 'Equal weight' {
