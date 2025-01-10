@@ -8,7 +8,7 @@ class Service {
         return (dboperation {
             # Return an enumerator of all location entries
             try {
-                [Location[]]$arr = DBFind $collection ([LiteDB.Query]::All()) ([Location])
+                [Location[]]$arr = Find $collection ([LiteDB.Query]::All()) ([Location])
                 , $arr
             }
             catch [System.InvalidCastException] {
@@ -68,16 +68,9 @@ class Location {
 function Get-ZLocationDatabaseFilePath
 {
     if ($env:ZLOCATION_TEST -eq 1) {
-        return (Join-Path ([IO.Path]::GetTempPath()) 'z-location-test.db')
+        return "$PSScriptRoot\..\testdb.db"
     }
     return (Join-Path $HOME 'z-location.db')
-}
-# Returns path to legacy ZLocation backup file.
-function Get-ZLocationLegacyBackupFilePath
-{
-    if($env:USERPROFILE -ne $null) {
-        Join-Path $env:USERPROFILE 'z-location.txt'
-    }
 }
 
 <#
@@ -115,25 +108,12 @@ function dboperation {
     }
 }
 
-$dbExists = Test-Path (Get-ZLocationDatabaseFilePath)
-$legacyBackupPath = Get-ZLocationLegacyBackupFilePath
-$legacyBackupExists = ($legacyBackupPath -ne $null) -and (Test-Path $legacyBackupPath)
-
 # Create empty db, collection, and index if it doesn't exist
 dboperation {
     $collection.EnsureIndex('path')
 }
 
 $service = [Service]::new()
-
-# Migrate legacy backup into database if appropriate
-if((-not $dbExists) -and $legacyBackupExists) {
-    Write-Warning "ZLocation changed storage from $legacyBackupPath to $(Get-ZLocationDatabaseFilePath), feel free to remove the old txt file"
-    Get-Content $legacyBackupPath | Where-Object { $_ -ne $null } | ForEach-Object {
-        $split = $_ -split "`t"
-        $service.add($split[0], $split[1])
-    }
-}
 
 Function Get-ZService {
     ,$service

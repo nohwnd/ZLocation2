@@ -32,7 +32,7 @@ function DBGetById([LiteDB.LiteCollection[LiteDB.BSONDocument]]$collection, $id,
     Find $collection ([LiteDB.Query]::EQ('_id', [LiteDB.BSONValue]::new($id))) $type
 }
 
-function DBFind([LiteDB.LiteCollection[LiteDB.BSONDocument]]$collection, [LiteDB.Query]$query, $type) {
+function Find([LiteDB.LiteCollection[LiteDB.BSONDocument]]$collection, [LiteDB.Query]$query, $type) {
     ForEach($document in $collection.Find([LiteDB.Query]$query)) {
         ToObject $type $document
     }

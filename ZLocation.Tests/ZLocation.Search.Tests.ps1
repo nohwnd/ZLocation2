@@ -67,7 +67,7 @@ Describe 'Find-Matches filters results correctly' {
             }
         }
 
-        It "should ignore trailing $pathSep" {
+        It "should ignore trailing <pathSep>" {
             Find-Matches $data "$foo1Path$pathSep" | Should -Be $foo1Path
         }
 

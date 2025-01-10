@@ -5,8 +5,6 @@ Describe 'ZLocation.Storage' {
 
         ${function:Add-ZWeight} = & (Get-Module ZLocation) { Get-Command Add-ZWeight -Module ZLocation }
 
-        . "$PSScriptRoot/_mocks.ps1"
-
         $path = [guid]::NewGuid().Guid
         $path2 = [guid]::NewGuid().Guid
         $path3 = 'FOO'

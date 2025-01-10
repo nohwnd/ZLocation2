@@ -63,13 +63,6 @@ function Register-PromptHook
     }
 }
 
-# On removal/unload of the module, restore original prompt or LocationChangedAction event handler.
-$ExecutionContext.SessionState.Module.OnRemove = {
-    Copy-Item function:\global:ZlocationOrigPrompt function:\global:prompt
-    Remove-Item function:\ZlocationOrigPrompt
-    Remove-Variable ZLocationPromptScriptBlock -Scope Global
-}
-
 #
 # End of weight function.
 #
@@ -271,9 +264,12 @@ function Clear-NonExistentZLocation {
 #     }
 # }
 
-
-$MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    Write-Warning "[ZLocation] module was removed, but service was not closed."
+# On removal/unload of the module, restore original prompt or LocationChangedAction event handler.
+$ExecutionContext.SessionState.Module.OnRemove = {
+    Write-Host "Removing prompt."
+    Copy-Item function:\global:ZlocationOrigPrompt function:\global:prompt
+    Remove-Item function:\ZlocationOrigPrompt
+    Remove-Variable ZLocationPromptScriptBlock -Scope Global
 }
 
 Register-PromptHook

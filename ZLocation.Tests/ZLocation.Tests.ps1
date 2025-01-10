@@ -1,11 +1,6 @@
 # Integration tests.
 
 Describe 'ZLocation' {
-
-    BeforeAll {
-        . "$PSScriptRoot/_mocks.ps1"
-    }
-
     Context 'Success scenario' {
 
         It 'can execute scenario with new directory' {
