@@ -1,10 +1,12 @@
 Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-# Listing nested modules in .psd1 creates additional scopes and Pester cannot mock cmdlets in those scopes.
-# Instead we import them here which works.
-Import-Module "$PSScriptRoot\ZLocation.Service.psd1"
-Import-Module "$PSScriptRoot\ZLocation.Search.psm1"
-Import-Module "$PSScriptRoot\ZLocation.Storage.psm1"
+. "$PSScriptRoot\ZLocation.LiteDB.ps1"
+. "$PSScriptRoot\ZLocation.Service.ps1"
+. "$PSScriptRoot\ZLocation.Search.ps1"
+. "$PSScriptRoot\ZLocation.Storage.ps1"
+
+
 
 # I currently consider number of commands executed in directory to be a better metric, than total time spent in a directory.
 # See [corresponding issue](https://github.com/vors/ZLocation/issues/6) for details.
@@ -263,10 +265,15 @@ function Clear-NonExistentZLocation {
     }
 }
 
-Get-FrequentFolders | ForEach-Object {
-    if (Test-Path $_) {
-        Add-ZWeight -Path $_ -Weight 0
-    }
+# Get-FrequentFolders | ForEach-Object {
+#     if (Test-Path $_) {
+#         Add-ZWeight -Path $_ -Weight 0
+#     }
+# }
+
+
+$MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
+    Write-Warning "[ZLocation] module was removed, but service was not closed."
 }
 
 Register-PromptHook

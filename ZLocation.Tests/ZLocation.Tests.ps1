@@ -1,13 +1,10 @@
 # Integration tests.
 
-# Maybe -Force re-import nested modules too?
-#Import-Module $PSScriptRoot\..\ZLocation\ZLocation.Storage.psm1 -Force
-#Import-Module $PSScriptRoot\..\ZLocation\ZLocation.Search.psm1 -Force
-Import-Module $PSScriptRoot\..\ZLocation\ZLocation.psd1 -Force
-
-. "$PSScriptRoot/_mocks.ps1"
-
 Describe 'ZLocation' {
+
+    BeforeAll {
+        . "$PSScriptRoot/_mocks.ps1"
+    }
 
     Context 'Success scenario' {
 
@@ -25,14 +22,14 @@ Describe 'ZLocation' {
 
                 # do the jump
                 z ($newdirectory.Substring(0, 3))
-                ($pwd).Path | Should Be $newDirFullPath
+                ($pwd).Path | Should -Be $newDirFullPath
 
                 # verify that pop-location can be used after z
                 z -
-                ($pwd).Path | Should Be $curDirFullPath
+                ($pwd).Path | Should -Be $curDirFullPath
 
                 $h = Get-ZLocation
-                $h[$newDirFullPath] | Should Be 1
+                $h[$newDirFullPath] | Should -Be 1
             } finally {
                 cd $curDirFullPath
                 Remove-Item -rec -force $newdirectory
@@ -49,7 +46,7 @@ Describe 'ZLocation' {
 
                 # do the jump
                 z $newdirectory
-                ($pwd).Path | Should Be $newDirFullPath
+                ($pwd).Path | Should -Be $newDirFullPath
             }
             finally {
                 cd $curDirFullPath
@@ -60,9 +57,11 @@ Describe 'ZLocation' {
     }
 
     Context 'tab completion' {
-        Function Complete($command) {
-            [System.Management.Automation.CommandCompletion]::CompleteInput($command, $command.Length, @{}).CompletionMatches.ListItemText
-            (TabExpansion2 $command $command.Length).CompletionMatches.ListItemText
+        BeforeAll {
+            Function Complete($command) {
+                [System.Management.Automation.CommandCompletion]::CompleteInput($command, $command.Length, @{}).CompletionMatches.ListItemText
+                (TabExpansion2 $command $command.Length).CompletionMatches.ListItemText
+            }
         }
         BeforeEach {
             Update-ZLocation 'prefixABC'

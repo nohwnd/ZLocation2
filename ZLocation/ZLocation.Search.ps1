@@ -120,5 +120,3 @@ function Test-FuzzyMatch {
     $leaf = Split-Path -Leaf $path
     return (contains -left $leaf -right $query[$n-1])
 }
-
-Export-ModuleMember -Function Find-Matches

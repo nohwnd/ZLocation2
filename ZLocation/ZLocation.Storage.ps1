@@ -1,8 +1,3 @@
-Set-StrictMode -Version Latest
-
-Import-Module (Join-Path $PSScriptRoot 'ZLocation.Service.psd1')
-Import-Module (Join-Path $PSScriptRoot 'ZLocation.Search.psm1')
-
 function Get-ZLocation($Match)
 {
     $service = Get-ZService
@@ -39,9 +34,3 @@ function Remove-ZLocation {
     $service = Get-ZService
     $service.Remove($path)
 }
-
-$MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    Write-Warning "[ZLocation] module was removed, but service was not closed."
-}
-
-Export-ModuleMember -Function @("Get-ZLocation", "Add-ZWeight", "Remove-ZLocation")
