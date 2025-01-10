@@ -1,12 +1,10 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-. "$PSScriptRoot\ZLocation.LiteDB.ps1"
-. "$PSScriptRoot\ZLocation.Service.ps1"
-. "$PSScriptRoot\ZLocation.Search.ps1"
-. "$PSScriptRoot\ZLocation.Storage.ps1"
-
-
+. "$PSScriptRoot\LiteDB.ps1"
+. "$PSScriptRoot\Service.ps1"
+. "$PSScriptRoot\Search.ps1"
+. "$PSScriptRoot\Storage.ps1"
 
 # I currently consider number of commands executed in directory to be a better metric, than total time spent in a directory.
 # See [corresponding issue](https://github.com/vors/ZLocation/issues/6) for details.

@@ -1,5 +1,7 @@
 CHANGELOG
 -------------
+> ⚠️ Forked from ZLocation that is no longer active, and renamed to ZLocation2. Further changes are tracked in release notes.
+
 ## 1.4.3
 * README and setup instruction improvements ([#106](https://github.com/vors/ZLocation/pull/106)) (Thanks @deltoss)
 * Avoid an exception processing results in Get-ZLocation ([#112](https://github.com/vors/ZLocation/issues/112)) (Thanks @kahlin)
