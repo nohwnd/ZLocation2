@@ -1,16 +1,11 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/qqg75o50jj6e35mn/branch/master?svg=true)](https://ci.appveyor.com/project/vors/zlocation/branch/master)
-
-ZLocation
+ZLocation2
 =========
 
-[![Join the chat at https://gitter.im/vors/ZLocation](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vors/ZLocation?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+ZLocation2 is an opinionated fork of ZLocation [ZLocation](https://github.com/vors/zlocation).
 
 Tracks your most used directories, based on number of previously run commands.
 After  a  short  learning  phase, `z` will take you to the most popular directory that matches all of the regular expressions given on the command line.
 You can use **Tab-Completion / Intellisense** to pick directories that are not the first choice.
-
-ZLocation is the successor of [Jump-Location](https://github.com/tkellogg/Jump-Location).
-Like [z.sh](https://github.com/rupa/z) is a reimagined clone of [autojump](https://github.com/joelthelion/autojump), Zlocation is a reimagined clone of Jump-Location.
 
 Usage
 -----
@@ -94,7 +89,7 @@ Write-Host -Foreground Green "`n[ZLocation] knows about $((Get-ZLocation).Keys.C
 
 ### Note
 
-ZLocation alternates your prompt function to track the location. Meaning if you use this module with other modules that modifies your prompt function (e.g. such as `posh-git`), then you'd need to adjust your [Powershell profile file](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7). The statement `Import-Module ZLocation` needs to be placed **after** the other module imports that modifies your prompt function.
+ZLocation alters your prompt function to track the location. Meaning if you use this module with other modules that modifies your prompt function (e.g. such as `posh-git`), then you'd need to adjust your [Powershell profile file](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7). The statement `Import-Module ZLocation` needs to be placed **after** the other module imports that modifies your prompt function.
 
 You can open up `profile.ps1` through using any of the below commands:
 
@@ -113,15 +108,10 @@ Alternatively, type up the below in your file explorer, and then edit the `profi
 License
 -------
 
-ZLocation is released under the [MIT](LICENSE) license.
+ZLocation2 is released under the [MIT](LICENSE) license.
 
-ZLocation bundles a copy of [LiteDB](http://www.litedb.org/).
-
-### LiteDB License
-
-[MIT](http://opensource.org/licenses/MIT)
-
-Copyright (c) 2017 - Maurício David.
+ZLocation2 bundles a copy of LiteDB - [MIT license](https://github.com/litedb-org/LiteDB/blob/master/LICENSE)
+ZLocation2 is a fork of ZLocation - [MIT license](https://github.com/vors/ZLocation/blob/master/LICENSE)
 
 Develop
 -------
