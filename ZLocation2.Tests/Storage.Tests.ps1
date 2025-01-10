@@ -3,7 +3,7 @@ Describe 'ZLocation.Storage' {
     BeforeAll {
         $originalCount = (Get-ZLocation).Count
 
-        ${function:Add-ZWeight} = & (Get-Module ZLocation) { Get-Command Add-ZWeight -Module ZLocation }
+        ${function:Add-ZWeight} = & (Get-Module ZLocation2) { Get-Command Add-ZWeight -Module ZLocation2 }
 
         $path = [guid]::NewGuid().Guid
         $path2 = [guid]::NewGuid().Guid
