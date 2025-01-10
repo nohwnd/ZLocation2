@@ -1,3 +1,7 @@
+param (
+    [switch] $CI
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -12,7 +16,7 @@ Get-Module ZLocation2 | Remove-Module
 
 try {
     Import-Module $PSScriptRoot/ZLocation2/ZLocation2.psd1
-    Invoke-Pester -Output Detailed
+    Invoke-Pester -Output Detailed -CI:$CI
 }
 finally {
     Get-Module ZLocation2 | Remove-Module
