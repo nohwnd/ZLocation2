@@ -128,9 +128,9 @@ function Set-ZLocation([Parameter(ValueFromRemainingArguments)][string[]]$match)
         return
     }
 
-    $matches = Find-Matches (Get-ZLocation) $match
+    $matchingPaths = Find-Matches (Get-ZLocation) $match
     $pushDone = $false
-    foreach ($m in $matches) {
+    foreach ($m in $matchingPaths) {
         if (Test-path $m) {
             Push-Location $m
             $pushDone = $true
