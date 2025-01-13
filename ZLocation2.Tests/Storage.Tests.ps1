@@ -50,7 +50,7 @@ Describe 'ZLocation.Storage' {
     }
 
     It 'can remove path' {
-            Remove-ZLocation -path $path2
+        Remove-ZLocation -path $path2
         Remove-ZLocation -path $path3
         Remove-ZLocation -path $path4
         $h = Get-ZLocation
