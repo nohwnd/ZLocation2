@@ -68,9 +68,10 @@ Goals / Key features
 *  Works on Windows, Linux and MacOS.
 
 ## Install
-Install from [PowerShellGet Gallery](https://www.powershellgallery.com/packages/ZLocation/)
+Install from [PowerShellGet Gallery](https://www.powershellgallery.com/packages/ZLocation2/)
+
 ```powershell
-Install-Module ZLocation -Scope CurrentUser
+Install-Module ZLocation2
 ```
 
 Make sure to **include ZLocation import in your `$PROFILE`**.
@@ -79,7 +80,7 @@ It intentionally doesn't alter `$PROFILE` automatically on installation.
 This one-liner installs ZLocation, imports it and adds it to a profile.
 
 ```powershell
-Install-Module ZLocation -Scope CurrentUser; Import-Module ZLocation; Add-Content -Value "`r`n`r`nImport-Module ZLocation`r`n" -Encoding utf8 -Path $PROFILE.CurrentUserAllHosts
+Install-Module ZLocation2 -Scope CurrentUser; Import-Module ZLocation2; Add-Content -Value "`r`n`r`nImport-Module ZLocation2`r`n" -Encoding utf8 -Path $PROFILE.CurrentUserAllHosts
 ```
 
 If you want to display some additional information about ZLocation on start-up, you can put this snippet in `$PROFILE` after import. 
@@ -118,5 +119,6 @@ Develop
 
 ### Run tests
 
-Install [Pester](https://github.com/pester/Pester).
-Run `Invoke-Pester` from the root folder.
+Run ./test.ps1
+
+The module modifies your prompt, so expect problems when you debug. It also has hard time handling when ZLocation (the original one) or ZLocation2 (the new one) are installed. Looking into this.
