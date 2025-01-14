@@ -29,10 +29,10 @@ function DBDelete([LiteDB.LiteCollection[LiteDB.BSONDocument]]$collection, $quer
 }
 
 function DBGetById([LiteDB.LiteCollection[LiteDB.BSONDocument]]$collection, $id, $type) {
-    Find $collection ([LiteDB.Query]::EQ('_id', [LiteDB.BSONValue]::new($id))) $type
+    DBFind $collection ([LiteDB.Query]::EQ('_id', [LiteDB.BSONValue]::new($id))) $type
 }
 
-function Find([LiteDB.LiteCollection[LiteDB.BSONDocument]]$collection, $query, $type) {
+function DBFind([LiteDB.LiteCollection[LiteDB.BSONDocument]]$collection, $query, $type) {
     ForEach($document in $collection.Find($query)) {
         ToObject $type $document
     }

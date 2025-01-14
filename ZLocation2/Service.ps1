@@ -8,7 +8,7 @@ class Service {
         return (dboperation {
             # Return an enumerator of all location entries
             try {
-                [Location[]]$arr = Find $collection ([LiteDB.Query]::All()) ([Location])
+                [Location[]]$arr = DBFind $collection ([LiteDB.Query]::All()) ([Location])
                 , $arr
             }
             catch [System.InvalidCastException] {
