@@ -70,6 +70,11 @@ function Get-ZLocationDatabaseFilePath
     if ($env:ZLOCATION_TEST -eq 1) {
         return "$PSScriptRoot\..\testdb.db"
     }
+    
+    if ($env:ZLOCATION_DATABASE_PATH) {
+        return $env:ZLOCATION_DATABASE_PATH
+    }
+    
     return (Join-Path $HOME 'z-location2.db')
 }
 
