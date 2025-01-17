@@ -59,6 +59,10 @@ C:\>z -
 C:\>#no-op
 ```
 
+### Custom database file location
+
+ZLocation uses a database file to store the list of known directories. By default, it is located at `$HOME\z-location2.db`. If you want to use a custom path, set the `$env:ZLOCATION_DATABASE_PATH` to full path to the database (e.g. `C:\temp\my.db`) before importing the module.
+
 Goals / Key features
 --------------------
 
