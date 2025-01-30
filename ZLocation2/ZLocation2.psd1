@@ -4,7 +4,7 @@
 RootModule = 'ZLocation2.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.1.2'
+ModuleVersion = '2.1.3'
 
 # ID used to uniquely identify this module
 GUID = 'd3f9bef0-6194-420b-a4fa-5fea681d9fa0'
@@ -40,7 +40,7 @@ PowerShellVersion = '5.1.0'
 RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @("LiteDB\LiteDB.dll")
+RequiredAssemblies = @("LiteDB\System.Buffers.dll", "LiteDB\LiteDB.dll")
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 ScriptsToProcess = @()
