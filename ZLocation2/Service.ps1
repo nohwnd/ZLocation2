@@ -5,7 +5,7 @@ class Service {
     Service () {}
 
     [Collections.Generic.IEnumerable[Location]] Get() {
-        return (dboperation {
+        return (Invoke-DBOperation {
             # Return an enumerator of all location entries
             try {
                 [Location[]]$arr = DBFind $collection ([LiteDB.Query]::All()) ([Location])
@@ -31,7 +31,7 @@ class Service {
         })
     }
     [void] Add([string]$path, [double]$weight) {
-        dboperation {
+        Invoke-DBOperation {
             $l = DBGetById $collection $path ([Location])
             if($l) {
                 $l.weight += $weight
@@ -49,7 +49,7 @@ class Service {
         }
     }
     [void] Remove([string]$path) {
-        dboperation {
+        Invoke-DBOperation {
             # Use DB's internal column name, not mapped name
             DBDelete $collection ([LiteDB.Query]::EQ('_id', [LiteDB.BSONValue]::new($path)))
         }
@@ -84,7 +84,7 @@ function Get-ZLocationDatabaseFilePath
  See: https://github.com/mbdavid/LiteDB/wiki/Concurrency
  Exposes $db and $collection variables for use by the $scriptblock
 #>
-function dboperation {
+function Invoke-DBOperation {
     param (
         [Parameter(Mandatory=$true)] $private:scriptblock
     )
@@ -114,12 +114,12 @@ function dboperation {
 }
 
 # Create empty db, collection, and index if it doesn't exist
-dboperation {
+Invoke-DBOperation {
     $collection.EnsureIndex('path')
 }
 
 $service = [Service]::new()
 
-Function Get-ZService {
+function Get-ZService {
     ,$service
 }

@@ -1,14 +1,12 @@
 Set-StrictMode -Version Latest
 
-if ((Get-Variable IsWindows -ErrorAction Ignore) -eq $null) { $IsWindows = $true }
-
 function Find-Matches {
     param (
         [Parameter(Mandatory=$true)] [hashtable]$hash, 
         [string[]]$query
     )
     $hash = $hash.Clone()
-    foreach ($key in ($hash.GetEnumerator() | %{$_.Name}))
+    foreach ($key in ($hash.GetEnumerator() | ForEach-Object {$_.Name}))
     {
         if (-not (Test-FuzzyMatch $key $query))
         {
@@ -16,7 +14,7 @@ function Find-Matches {
         }
     }
 
-    if ($query -ne $null -and $query.Length -gt 0) {
+    if ($null -ne $query -and $query.Length -gt 0) {
         $lowerPrefix = $query[-1].ToLower()
         # we should prefer paths that start with the query over paths with bigger weight
         # that don't.
@@ -25,8 +23,8 @@ function Find-Matches {
         # /afoo = 2.0
         # and query is "fo", we should prefer /foo
         # Similarly, with the same query `fo`, the full match `/fo` should win over `/fo2`
-        $res = $hash.GetEnumerator() | % {
-            New-Object -TypeName PSCustomObject -Property @{
+        $res = $hash.GetEnumerator() | ForEach-Object {
+            [PSCustomObject]@{
                 Name=$_.Name
                 Value=$_.Value
                 Starts=[int](Start-WithPrefix -Path $_.Name -lowerPrefix $lowerPrefix)
@@ -38,7 +36,7 @@ function Find-Matches {
     }
 
     if ($res) {
-        $res | %{$_.Name}
+        $res.Name
     }
 }
 
@@ -69,7 +67,7 @@ function Test-FuzzyMatch {
         return [bool]($left.IndexOf($right, [System.StringComparison]::OrdinalIgnoreCase) -ge 0)
     }
 
-    if ($query -eq $null) {
+    if ($null -eq $query) {
         return $true
     }
     $n = $query.Length
