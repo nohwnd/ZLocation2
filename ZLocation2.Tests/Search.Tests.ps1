@@ -1,9 +1,10 @@
 Describe 'Find-Matches filters results correctly' {
-    BeforeAll {
-        if($IsWindows -eq $null) {
+    BeforeDiscovery {
+        if(-not (Test-Path -Path Variable:IsWindows)) {
             $script:IsWindows = $true
         }
-
+    }
+    BeforeAll {
         ${function:Find-Matches} = & (Get-Module ZLocation2) { Get-Command Find-Matches -Module ZLocation2 } 
     }
 
