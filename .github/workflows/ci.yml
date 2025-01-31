@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  os_matrix:
+  test:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -17,9 +17,7 @@ jobs:
         include: 
           - os: windows-latest
             shell: powershell
-  test:
     runs-on: ${{ matrix.os }}
-
     steps:
       - uses: actions/checkout@v4
       - name: Perform a Pester test from the Tests.ps1 file
