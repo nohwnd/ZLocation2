@@ -9,13 +9,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
+  # shell cannot be taken from matrix https://github.com/actions/runner/issues/444
+  test_on_pwsh:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Perform a Pester test from the Tests.ps1 file
         shell: pwsh
+        run: |
+          ./test.ps1 -ci
+  test_on_powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Perform a Pester test from the Tests.ps1 file
+        shell: powershell
         run: |
           ./test.ps1 -ci
       
