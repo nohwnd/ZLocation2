@@ -95,13 +95,16 @@ PrivateData = @{
         LicenseUri = 'https://github.com/nohwnd/ZLocation2/blob/master/LICENSE'
 
         # A URL to the main website for this project.
-        ProjectUri = 'https://github.com/nohwnd/ZLocation'
+        ProjectUri = 'https://github.com/nohwnd/ZLocation2'
 
         # A URL to an icon representing this module.
         # IconUri = ''
 
         # ReleaseNotes of this module
         ReleaseNotes = 'https://github.com/nohwnd/ZLocation2/releases/tag/2.2.0'
+
+        # Prerelease string of this module
+        Prerelease   = 'rc1'
 
     } # End of PSData hashtable
 
