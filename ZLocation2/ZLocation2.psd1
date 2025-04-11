@@ -4,7 +4,7 @@
 RootModule = 'ZLocation2.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.1.3'
+ModuleVersion = '2.2.0'
 
 # ID used to uniquely identify this module
 GUID = 'd3f9bef0-6194-420b-a4fa-5fea681d9fa0'
@@ -101,7 +101,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'https://github.com/nohwnd/ZLocation2/blob/master/CHANGELOG.md'
+        ReleaseNotes = 'https://github.com/nohwnd/ZLocation2/releases/tag/2.2.0'
 
     } # End of PSData hashtable
 
