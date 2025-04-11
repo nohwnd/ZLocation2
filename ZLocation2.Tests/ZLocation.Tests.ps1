@@ -2,14 +2,8 @@
 
 Describe 'ZLocation' {
     BeforeEach {
-        & (Get-Module ZLocation2) { 
-            # Clear the ZLocation2 test database
-            
-            $paths = Get-ZLocation
-            foreach ($path in $paths) {
-                Remove-ZLocation -path $path.Path
-            }
-         }
+        # Clear the ZLocation2 test database
+        Remove-Item $PSScriptRoot/../testdb.db -ErrorAction Ignore
     }
 
     Context 'Success scenario' {
@@ -99,9 +93,7 @@ Describe 'ZLocation' {
             # but not have the highest weight
             $now = Get-Date
             Update-ZLocation 'latest'
-            $now2 = Get-Date
 
-            Write-Host "Latest: $now2 , $now , $($now2 - $now)"
             # check the default sort by weight, old should be on top
             $latest = Get-ZLocation
             $latest.Path | Should -Be 'old', 'latest'

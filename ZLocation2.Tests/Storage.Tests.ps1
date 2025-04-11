@@ -5,14 +5,8 @@ Describe 'ZLocation.Storage' {
     }
 
     BeforeEach {
-        & (Get-Module ZLocation2) { 
-            # Clear the ZLocation2 test database
-            
-            $paths = Get-ZLocation
-            foreach ($path in $paths) {
-                Remove-ZLocation -path $path.Path
-            }
-         }
+        # Clear the ZLocation2 test database
+        Remove-Item $PSScriptRoot/../testdb.db -ErrorAction Ignore
     }
 
     It 'can add weight' {        
