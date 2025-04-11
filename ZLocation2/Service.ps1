@@ -78,7 +78,7 @@ function Get-ZLocationDatabaseFilePath
     # Make sure the paths here are properly using "/" or "\" based on the OS.
     # It will be handed to .NET LiteDB which is not slash agnostic.
     if ($env:ZLOCATION_TEST -eq 1) {
-        return  Join-Path "$PSScriptRoot" ".." "testdb.db"
+        return  [IO.Path]::Combine("$PSScriptRoot", "..", "testdb.db")
     }
     
     if ($env:ZLOCATION_DATABASE_PATH) {
@@ -100,7 +100,7 @@ function dboperation {
     )
     $Private:Mode = if (Get-Variable IsMacOS -ErrorAction Ignore) { 'Exclusive' } else { 'Shared' }
     # $db and $collection will be in-scope within $scriptblock
-    $db = DBOpen "Filename=$( Get-ZLocationDatabaseFilePath ); Mode=$Mode"
+    $db = DBOpen "Filename=$(Get-ZLocationDatabaseFilePath); Mode=$Mode"
     $collection = Get-DBCollection $db 'location'
     try {
         # retry logic: on Mac we may not be able to execute the read concurrently

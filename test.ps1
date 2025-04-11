@@ -6,7 +6,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 if (-not (Get-Module Pester -ListAvailable)) {
-    Install-Module Pester
+    Install-Module Pester -Scope CurrentUser
 }
 
 $env:ZLOCATION_TEST = 1
