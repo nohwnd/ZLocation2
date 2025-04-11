@@ -3,6 +3,8 @@
 Describe 'ZLocation' {
     BeforeEach {
         # Clear the ZLocation2 test database
+        Write-Host "$PSScriptRoot/../testdb.db"
+        Write-HOst (ls $PSScriptRoot/../ -re | out-string)
         Remove-Item $PSScriptRoot/../testdb.db -ErrorAction Ignore
     }
 
