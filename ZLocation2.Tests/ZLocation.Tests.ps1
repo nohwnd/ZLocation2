@@ -91,7 +91,10 @@ Describe 'ZLocation' {
 
             # then we access latest again, and it should be on top of the list when asking for latest
             # but not have the highest weight
-            $now = Get-Date
+            $now = (Get-Date)
+            # the DB will cut off any time that is smaller than milliseconds, we need to do the same to have comparable times
+            # because after truncating the now in db might be before the $now in code
+            $nowTrimmed = $now.Add(-$now.Microsecond) 
             Update-ZLocation 'latest'
 
             # check the default sort by weight, old should be on top
@@ -105,8 +108,8 @@ Describe 'ZLocation' {
             # check timing on last used is recent (and is not UTC)
             $latestEntry = $latest[0]
             $latestEntry.Path | Should -Be 'latest'
-            $latestEntry.LastUsed | Should -BeGreaterThan $now # is not too old
-            $latestEntry.LastUsed | Should -BeLessThan $now.AddSeconds(1) # is not too new
+            $latestEntry.LastUsed | Should -BeGreaterThan $nowTrimmed # is not too old
+            $latestEntry.LastUsed | Should -BeLessThan $nowTrimmed.AddSeconds(1) # is not too new
         }
     }
 }
