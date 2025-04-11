@@ -1,21 +1,27 @@
-function Get-ZLocation($Match)
-{
+function Get-ZLocationUnsorted ($Match) {
     $service = Get-ZService
-    $hash = [Collections.HashTable]::new()
-    foreach ($item in $service.Get())
-    {
-        $hash[$item.path] = $item.weight
+    $entries =  $service.Get()
+    if (-not $Match) {
+        return $entries
     }
-
-    if ($Match)
-    {
-        # Create a new hash containing only matching locations
-        $newhash = @{}
-        $Match | %{Find-Matches $hash $_} | %{$newhash.add($_, $hash[$_])}
-        $hash = $newhash
+    
+    foreach ($match in $Match) {
+        foreach ($found in (Find-Matches $entries $match)) {
+            $found
+        }
     }
+}
 
-    return $hash
+function Get-ZLocation
+{
+    [CmdletBinding()]
+    param (
+        [string[]] $Match,
+        [ValidateSet("Weight", "LastUsed", "Path")]
+        [string] $Sort = "Weight"
+    )
+
+    Get-ZLocationUnsorted -Match $Match | Sort-Object -Property $Sort -Descending
 }
 
 function Add-ZWeight {

@@ -4,7 +4,7 @@ class Service {
 
     Service () {}
 
-    [Collections.Generic.IEnumerable[Location]] Get() {
+    [Location[]] Get() {
         return (dboperation {
             # Return an enumerator of all location entries
             try {
@@ -25,7 +25,7 @@ class Service {
                         Write-Error 'Problem entries could not be removed.'
                     }
                 } else {
-                        Write-Error 'No problem entries found, please open an issue on https://github.com/vors/ZLocation'
+                        Write-Error 'No problem entries found, please open an issue on https://github.com/nohwnd/ZLocation2'
                 }
             }
         })
@@ -35,11 +35,14 @@ class Service {
             $l = DBGetById $collection $path ([Location])
             if($l) {
                 $l.weight += $weight
+                $l.lastUsed = (Get-Date)
                 DBUpdate $collection $l
             } else {
                 $l = [Location]::new()
                 $l.path = $path
                 $l.weight = $weight
+                $l.lastUsed = (Get-Date)
+                
                 try {
                     DBInsert $collection $l
                 } catch [LiteDB.LiteException] { 
@@ -63,6 +66,8 @@ class Location {
     [string] $path;
 
     [double] $weight;
+
+    [datetime] $lastUsed;
 }
 
 function Get-ZLocationDatabaseFilePath
@@ -104,7 +109,7 @@ function dboperation {
                     $rand = Get-Random 100
                     Start-Sleep -Milliseconds (($__i + 1) * 100 - $rand)
                 } else {
-                    throw [System.IO.IOException] 'Cannot execute database operation after 5 attempts, please open an issue on https://github.com/vors/ZLocation'
+                    throw [System.IO.IOException] 'Cannot execute database operation after 5 attempts, please open an issue on https://github.com/nohwnd/ZLocation2'
                 }
             }
         }
@@ -120,6 +125,6 @@ dboperation {
 
 $service = [Service]::new()
 
-Function Get-ZService {
+function Get-ZService {
     ,$service
 }
