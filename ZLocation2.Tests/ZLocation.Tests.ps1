@@ -94,9 +94,9 @@ Describe 'ZLocation' {
             # then we access latest again, and it should be on top of the list when asking for latest
             # but not have the highest weight
             $now = (Get-Date)
-            # the DB will cut off any time that is smaller than milliseconds, we need to do the same to have comparable times
-            # because after truncating the now in db might be before the $now in code
-            $nowTrimmed = $now.Add(-$now.Microsecond) 
+            # the DB will cut off any time that is smaller than milliseconds, so we round up to whole second
+            # because after truncating the now in db might be before the $now in code.
+            $nowTrimmed = $now.Add(-$now.Millisecond) 
             Update-ZLocation 'latest'
 
             # check the default sort by weight, old should be on top

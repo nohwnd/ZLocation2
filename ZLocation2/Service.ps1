@@ -75,8 +75,10 @@ class Location {
 
 function Get-ZLocationDatabaseFilePath
 {
+    # Make sure the paths here are properly using "/" or "\" based on the OS.
+    # It will be handed to .NET LiteDB which is not slash agnostic.
     if ($env:ZLOCATION_TEST -eq 1) {
-        return "$PSScriptRoot\..\testdb.db"
+        return  Join-Path "$PSScriptRoot" ".." "testdb.db"
     }
     
     if ($env:ZLOCATION_DATABASE_PATH) {
