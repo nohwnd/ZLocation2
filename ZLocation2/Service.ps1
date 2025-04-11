@@ -63,11 +63,14 @@ class Location {
     Location() {}
 
     [LiteDB.BsonId()]
-    [string] $path;
+    [LiteDB.BsonField("path")]
+    [string] $Path
 
-    [double] $weight;
+    [LiteDB.BsonField("weight")]
+    [double] $Weight
 
-    [datetime] $lastUsed;
+    [LiteDB.BsonField("lastUsed")]
+    [datetime] $LastUsed
 }
 
 function Get-ZLocationDatabaseFilePath
