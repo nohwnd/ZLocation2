@@ -4,19 +4,18 @@ if ((Get-Variable IsWindows -ErrorAction Ignore) -eq $null) { $IsWindows = $true
 
 function Find-Matches {
     param (
-        [Parameter(Mandatory=$true)] [hashtable]$hash, 
+        [Parameter(Mandatory=$true)] [Location[]]$Locations, 
         [string[]]$query
     )
-    $hash = $hash.Clone()
-    foreach ($key in ($hash.GetEnumerator() | %{$_.Name}))
-    {
-        if (-not (Test-FuzzyMatch $key $query))
-        {
-            $hash.Remove($key)
-        }
-    }
 
-    if ($query -ne $null -and $query.Length -gt 0) {
+    $matching = foreach ($location in $Locations) {
+            if (Test-FuzzyMatch $location.Path $query)
+            {
+                $location
+            }
+        }
+
+    if ($null -ne $query -and $query.Length -gt 0) {
         $lowerPrefix = $query[-1].ToLower()
         # we should prefer paths that start with the query over paths with bigger weight
         # that don't.
@@ -25,21 +24,19 @@ function Find-Matches {
         # /afoo = 2.0
         # and query is "fo", we should prefer /foo
         # Similarly, with the same query `fo`, the full match `/fo` should win over `/fo2`
-        $res = $hash.GetEnumerator() | % {
+        $res = $matching | % {
             New-Object -TypeName PSCustomObject -Property @{
-                Name=$_.Name
-                Value=$_.Value
-                Starts=[int](Start-WithPrefix -Path $_.Name -lowerPrefix $lowerPrefix)
-                IsExactMatch=[int](IsExactMatch -Path $_.Name -lowerPrefix $lowerPrefix)
+                Path=$_.Path
+                Weight=$_.Weight
+                Starts=[int](Start-WithPrefix -Path $_.Path -lowerPrefix $lowerPrefix)
+                IsExactMatch=[int](IsExactMatch -Path $_.Path -lowerPrefix $lowerPrefix)
             }
-        } | Sort-Object -Property IsExactMatch, Starts, Value -Descending
+        } | Sort-Object -Property IsExactMatch, Starts, Weight -Descending
     } else {
-        $res = $hash.GetEnumerator() | Sort-Object -Property Value -Descending
+        $res = $matching | Sort-Object -Property Value -Descending
     }
 
-    if ($res) {
-        $res | %{$_.Name}
-    }
+    return $res
 }
 
 function Start-WithPrefix {

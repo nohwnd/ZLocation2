@@ -1,59 +1,48 @@
 # Integration tests.
 
 Describe 'ZLocation' {
+    BeforeEach {
+        # Clear the ZLocation2 test database
+        Remove-Item $PSScriptRoot/../testdb.db -ErrorAction Ignore
+    }
+
     Context 'Success scenario' {
 
         It 'can execute scenario with new directory' {
+            $originalPath = $pwd
             try {
-                $newdirectory = [guid]::NewGuid().Guid
-                $curDirFullPath = ($pwd).Path
-                mkdir $newdirectory
-                cd $newdirectory
-                $newDirFullPath = ($pwd).Path
+                $testDrive = (Get-PSDrive -Name 'TestDrive').Root
+                
+                $newDirectory = mkdir "$testDrive/newDirectory"
+                cd "$testDrive/newDirectory"
+
                 # trigger weight update
                 prompt > $null
+                
                 # go back
-                cd $curDirFullPath
+                cd $testDrive
 
-                # do the jump
-                z ($newdirectory.Substring(0, 3))
-                ($pwd).Path | Should -Be $newDirFullPath
+                # jump to the new directory
+                z "new"
+
+                $pwd | Should -Be (Join-Path $testDrive "newDirectory")
 
                 # verify that pop-location can be used after z
                 z -
-                ($pwd).Path | Should -Be $curDirFullPath
+                $pwd | Should -Be $testDrive
 
-                $h = Get-ZLocation
-                $h[$newDirFullPath] | Should -Be 1
+                (Get-ZLocation -Match $newDirectory).Weight | Should -Be 1
             } finally {
-                cd $curDirFullPath
-                Remove-Item -rec -force $newdirectory
-                Remove-ZLocation $newDirFullPath
-            }
-        }
-
-        It 'can navigate to an unvisited directory' {
-            try {
-                $newdirectory = [guid]::NewGuid().Guid
-                $curDirFullPath = ($pwd).Path
-                mkdir $newdirectory
-                $newDirFullPath = Join-Path $curDirFullPath $newdirectory
-
-                # do the jump
-                z $newdirectory
-                ($pwd).Path | Should -Be $newDirFullPath
-            }
-            finally {
-                cd $curDirFullPath
-                Remove-Item -rec -force $newdirectory
-                Remove-ZLocation $newDirFullPath
+                cd $originalPath
+                Remove-Item -Recurse -force "$testDrive/newDirectory"
+                Remove-ZLocation "$testDrive/newDirectory"
             }
         }
     }
 
     Context 'tab completion' {
         BeforeAll {
-            Function Complete($command) {
+            function Complete($command) {
                 [System.Management.Automation.CommandCompletion]::CompleteInput($command, $command.Length, @{}).CompletionMatches.ListItemText
                 (TabExpansion2 $command $command.Length).CompletionMatches.ListItemText
             }
@@ -83,6 +72,44 @@ Describe 'ZLocation' {
             $completions | Should -Contain 'prefixDEF'
             $completions | Should -Contain 'notthisGHI'
             $completions | Should -Contain 'notthisJKL'
+        }
+    }
+
+
+    Context "Getting latest entries in zlocation table" {
+        It "should return the latest entries in zlocation table" {
+            # will insert it initially
+            Update-ZLocation 'latest'
+
+            # we then access this path to be newest and have the highest weight
+            Update-ZLocation 'old'
+            Update-ZLocation 'old'
+            Update-ZLocation 'old'
+            Update-ZLocation 'old'
+
+            Start-Sleep -Seconds 1
+
+            # then we access latest again, and it should be on top of the list when asking for latest
+            # but not have the highest weight
+            $now = (Get-Date)
+            # the DB will cut off any time that is smaller than milliseconds, so we round up to whole second
+            # because after truncating the now in db might be before the $now in code.
+            $nowTrimmed = $now.Add(-$now.Millisecond) 
+            Update-ZLocation 'latest'
+
+            # check the default sort by weight, old should be on top
+            $latest = Get-ZLocation
+            $latest.Path | Should -Be 'old', 'latest'
+
+            # now sort by last used, and latest should be on top
+            $latest = Get-ZLocation -Sort 'LastUsed'
+            $latest.Path | Should -Be 'latest', 'old'
+        
+            # check timing on last used is recent (and is not UTC)
+            $latestEntry = $latest[0]
+            $latestEntry.Path | Should -Be 'latest'
+            $latestEntry.LastUsed | Should -BeGreaterThan $nowTrimmed # is not too old
+            $latestEntry.LastUsed | Should -BeLessThan $nowTrimmed.AddSeconds(1) # is not too new
         }
     }
 }

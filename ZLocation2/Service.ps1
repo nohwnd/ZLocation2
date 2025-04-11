@@ -4,7 +4,7 @@ class Service {
 
     Service () {}
 
-    [Collections.Generic.IEnumerable[Location]] Get() {
+    [Location[]] Get() {
         return (dboperation {
             # Return an enumerator of all location entries
             try {
@@ -25,7 +25,7 @@ class Service {
                         Write-Error 'Problem entries could not be removed.'
                     }
                 } else {
-                        Write-Error 'No problem entries found, please open an issue on https://github.com/vors/ZLocation'
+                        Write-Error 'No problem entries found, please open an issue on https://github.com/nohwnd/ZLocation2'
                 }
             }
         })
@@ -35,11 +35,14 @@ class Service {
             $l = DBGetById $collection $path ([Location])
             if($l) {
                 $l.weight += $weight
+                $l.lastUsed = (Get-Date)
                 DBUpdate $collection $l
             } else {
                 $l = [Location]::new()
                 $l.path = $path
                 $l.weight = $weight
+                $l.lastUsed = (Get-Date)
+                
                 try {
                     DBInsert $collection $l
                 } catch [LiteDB.LiteException] { 
@@ -60,15 +63,22 @@ class Location {
     Location() {}
 
     [LiteDB.BsonId()]
-    [string] $path;
+    [LiteDB.BsonField("path")]
+    [string] $Path
 
-    [double] $weight;
+    [LiteDB.BsonField("weight")]
+    [double] $Weight
+
+    [LiteDB.BsonField("lastUsed")]
+    [datetime] $LastUsed
 }
 
 function Get-ZLocationDatabaseFilePath
 {
+    # Make sure the paths here are properly using "/" or "\" based on the OS.
+    # It will be handed to .NET LiteDB which is not slash agnostic.
     if ($env:ZLOCATION_TEST -eq 1) {
-        return "$PSScriptRoot\..\testdb.db"
+        return  [IO.Path]::Combine("$PSScriptRoot", "..", "testdb.db")
     }
     
     if ($env:ZLOCATION_DATABASE_PATH) {
@@ -90,7 +100,7 @@ function dboperation {
     )
     $Private:Mode = if (Get-Variable IsMacOS -ErrorAction Ignore) { 'Exclusive' } else { 'Shared' }
     # $db and $collection will be in-scope within $scriptblock
-    $db = DBOpen "Filename=$( Get-ZLocationDatabaseFilePath ); Mode=$Mode"
+    $db = DBOpen "Filename=$(Get-ZLocationDatabaseFilePath); Mode=$Mode"
     $collection = Get-DBCollection $db 'location'
     try {
         # retry logic: on Mac we may not be able to execute the read concurrently
@@ -104,7 +114,7 @@ function dboperation {
                     $rand = Get-Random 100
                     Start-Sleep -Milliseconds (($__i + 1) * 100 - $rand)
                 } else {
-                    throw [System.IO.IOException] 'Cannot execute database operation after 5 attempts, please open an issue on https://github.com/vors/ZLocation'
+                    throw [System.IO.IOException] 'Cannot execute database operation after 5 attempts, please open an issue on https://github.com/nohwnd/ZLocation2'
                 }
             }
         }
@@ -120,6 +130,6 @@ dboperation {
 
 $service = [Service]::new()
 
-Function Get-ZService {
+function Get-ZService {
     ,$service
 }

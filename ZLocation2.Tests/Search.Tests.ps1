@@ -5,7 +5,25 @@ Describe 'Find-Matches filters results correctly' {
         }
     }
     BeforeAll {
-        ${function:Find-Matches} = & (Get-Module ZLocation2) { Get-Command Find-Matches -Module ZLocation2 } 
+        $zlocationModule = Get-Module ZLocation2
+        ${function:Find-Matches} = & $zlocationModule { Get-Command Find-Matches -Module ZLocation2 } 
+
+        function ConvertTo-LocationArray {
+            param (
+                [Parameter(ValueFromPipeline,Mandatory)] 
+                [hashtable]$Hash
+            )
+            foreach ($item in $Hash.GetEnumerator()) {
+                & $zlocationModule {
+                    param($item)
+                    New-Object -TypeName Location -Property @{
+                        path = $item.Key
+                        weight = $item.Value
+                    }
+                } $item
+            }
+        }
+        
     }
 
     Context 'Equal weight' {
@@ -16,7 +34,7 @@ Describe 'Find-Matches filters results correctly' {
                     'C:\foo1\foo2' = 1.0
                     'C:\foo1' = 1.0
                     'C:\' = 1.0
-                }
+                } | ConvertTo-LocationArray
                 $rootPath = 'C:\'
                 $foo1Path = 'C:\foo1'
                 $foo2Path = 'C:\foo1\foo2'
@@ -28,7 +46,7 @@ Describe 'Find-Matches filters results correctly' {
                     '/foo1/foo2' = 1.0
                     '/foo1' = 1.0
                     '/' = 1.0
-                }
+                } | ConvertTo-LocationArray
                 $rootPath = '/'
                 $foo1Path = '/foo1'
                 $foo2Path = '/foo1/foo2'
@@ -37,39 +55,34 @@ Describe 'Find-Matches filters results correctly' {
             }
         }
 
-        It 'Does not modify data' {
-            Find-Matches $data fuuuu
-            $data.Count | Should -Be 4
-        }
-
-        It 'returns only leave result' {
-            Find-Matches $data foo2 | Should -Be $foo2Path
+        It 'returns only filtered results' {
+            (Find-Matches $data foo2).Path | Should -Be $foo2Path
         }
 
         It 'returns multiply results' {
-            (Find-Matches $data foo | measure).Count | Should -Be 3
+            (Find-Matches $data foo | Measure-Object).Count | Should -Be 3
         }
 
         It 'should be case-insensitive' {
-            Find-Matches $data FoO1 | Should -Be $foo1Path
+            (Find-Matches $data FoO1).Path | Should -Be $foo1Path
         }
 
         If($IsWindows) {
             It 'returns disk root folder for C:' {
-                Find-Matches $data C: | Should -Be $rootPath
+                (Find-Matches $data C:).Path | Should -Be $rootPath
             }
 
             It 'returns disk root folder for C' {
-                Find-Matches $data C | Should -Be $rootPath
+                (Find-Matches $data C).Path | Should -Be $rootPath
             }
         } else {
             It 'returns disk root folder for /' {
-                Find-Matches $data / | Should -Be $rootPath
+                (Find-Matches $data /).Path | Should -Be $rootPath
             }
         }
 
         It "should ignore trailing <pathSep>" {
-            Find-Matches $data "$foo1Path$pathSep" | Should -Be $foo1Path
+            (Find-Matches $data "$foo1Path$pathSep").Path | Should -Be $foo1Path
         }
 
     }
@@ -81,19 +94,19 @@ Describe 'Find-Matches filters results correctly' {
                 $data = @{
                     'C:\admin' = 1.0
                     'C:\admin\monad' = 2.0
-                }
+                } | ConvertTo-LocationArray
                 $adminPath = 'C:\admin'
             } else {
                 $data = @{
                     '/admin' = 1.0
                     '/admin/monad' = 2.0
-                }
+                } | ConvertTo-LocationArray
                 $adminPath = '/admin'
             }
         }
 
         It 'Uses leaf match' {
-            Find-Matches $data 'adm' | Should -Be $adminPath
+            (Find-Matches $data 'adm').Path | Should -Be $adminPath
         }
     }
 
@@ -109,11 +122,11 @@ Describe 'Find-Matches filters results correctly' {
             $data = @{
                 $fooPath = 1.0
                 $afooPath = 1000.0
-            }
+            } | ConvertTo-LocationArray
         }
 
         It 'Uses prefix match' {
-            Find-Matches $data 'fo' | Should -Be @($fooPath, $afooPath)
+            (Find-Matches $data 'fo').Path | Should -Be @($fooPath, $afooPath)
         }
     }
 
@@ -129,11 +142,11 @@ Describe 'Find-Matches filters results correctly' {
             $data = @{
                 $fooPath = 1.0
                 $afooPath = 1000.0
-            }
+            } | ConvertTo-LocationArray
         }
 
         It 'Uses prefix match' {
-            Find-Matches $data 'foo' | Should -Be @($fooPath, $afooPath)
+            (Find-Matches $data 'foo').Path | Should -Be @($fooPath, $afooPath)
         }
     }
 }

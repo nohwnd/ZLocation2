@@ -42,7 +42,7 @@ function Update-ZLocation
     param (
         [Parameter(Mandatory=$true)] [string]$Path
     )
-    Add-ZWeight $path 1.0
+    Add-ZWeight $Path 1.0
 }
 
 function Register-PromptHook
@@ -78,7 +78,8 @@ if(Get-Command -Name Register-ArgumentCompleter -ErrorAction Ignore) {
             [string[]]$query = if($i -gt 1) {
                 $commandAst.CommandElements[1..($i-1)] | ForEach-Object { $_.toString()}
             }
-            Find-Matches (Get-ZLocation) $query | Get-EscapedPath
+            
+            (Find-Matches (Get-ZLocationUnsorted) $query).Path | Get-EscapedPath
         }
     }
 }
@@ -119,7 +120,7 @@ function Set-ZLocation([Parameter(ValueFromRemainingArguments)][string[]]$match)
     Register-PromptHook
 
     if (-not $match) {
-        $match= @()
+        $match = @()
     }
 
     # Special case to enable Pop-Location.
@@ -128,21 +129,21 @@ function Set-ZLocation([Parameter(ValueFromRemainingArguments)][string[]]$match)
         return
     }
 
-    $matchingPaths = Find-Matches (Get-ZLocation) $match
+    $found = Find-Matches (Get-ZLocationUnsorted) $match
     $pushDone = $false
-    foreach ($m in $matchingPaths) {
-        if (Test-path $m) {
-            Push-Location $m
+    foreach ($m in $found) {
+        if (Test-Path $m.Path) {
+            Push-Location $m.Path
             $pushDone = $true
             break
         } else {
-            Write-Warning "There is no path $m on the file system. Removing obsolete data from database."
+            Write-Warning "There is no path $($m.Path) on the file system. Removing obsolete data from database."
             Remove-ZLocation $m
         }
     }
     if (-not $pushDone) {
-        if (($match.Count -eq 1) -and (Test-Path "$match")) {
-            Write-Debug "No matches for $match, attempting Push-Location"
+        if (($found.Count -eq 1) -and (Test-Path $found.Path)) {
+            Write-Debug "No matches for $($match.Path), attempting Push-Location"
             Push-Location "$match"
         } else {
             Write-Warning "Cannot find matching location"
@@ -152,31 +153,46 @@ function Set-ZLocation([Parameter(ValueFromRemainingArguments)][string[]]$match)
 
 <#
     .SYNOPSIS
-    Jump to popular directories.
+    Jump or show popular directories.
 
     .DESCRIPTION
     This is the main entry point in the interactive usage of ZLocation.
-    It's intended to be used as an alias z.
+    
+    It's intended to be used as an alias z, and serves 3 purposes:
+    1. Jump to a directory that matches the given query
+        EXAMPLE:
+            PS> z proj
+            PS C:\source\projects> 
 
-    Usage:
-        z - prints available directories
-        z -l foo - prints available directories scoped to foo query
-        z foo - jumps into the location that matches foo
-        z foo <TAB> - pressing tab cycles through different matches for foo
-        z - - undos the last z jump.
+    2. Jump to most recently visited directory.
+        EXAMPLE:
+            PS C:\Users\nohwnd> z -
+            PS C:\source\projects>
+
+    3. Show the most popular directories.
+        EXAMPLE:
+            PS> z
+            Path                      Weight
+            ----                      ------
+            C:\source\projects\Pester 8045
+            C:\source\projects        472
+            C:\movies\StarWars        123
+
+   .EXAMPLE
+    PS> z proj
+    PS C:\source\projects> 
+
+   .EXAMPLE
+    PS C:\Users\nohwnd> z -
+    PS C:\source\projects>
 
     .EXAMPLE
-    PS>z
-    Weight Path
-    ------ ----
-        7 C:\Windows
-        1 C:\Windows\System
-        27 C:\WINDOWS\system32
-        [...]
-
-    .EXAMPLE
-    C:\>z foo
-    C:\foo>
+    PS> z
+    Path                      Weight
+    ----                      ------
+    C:\source\projects\Pester 8045
+    C:\source\projects        472
+    C:\movies\StarWars        123
 
     .EXAMPLE
     C:\>z foo <PRESS TAB; NOT ENTER>
@@ -185,52 +201,37 @@ function Set-ZLocation([Parameter(ValueFromRemainingArguments)][string[]]$match)
     C:\>z C:\least_popular\foo
     C:\least_popular\foo>
 
-    .EXAMPLE
-    PS>z -l sys
-    Weight Path
-    ------ ----
-        27 C:\WINDOWS\system32
-         1 C:\Windows\System
-
-    .EXAMPLE
-    C:\>z foo
-    C:\foo>z bar
-    C:\baz\bar> z -
-    C:\foo>z -
-    C:\>z -
-    C:\>#no-op
 
     .LINK
-    https://github.com/vors/ZLocation
+    https://github.com/nohwnd/ZLocation2
 #>
 function Invoke-ZLocation
 {
+    [CmdletBinding(DefaultParameterSetName='Default')]
     param(
-        [Parameter(ValueFromRemainingArguments)][string[]]$match
+        [Parameter(Mandatory,ParameterSetName='GetFilteredPopularPaths')]
+        [Alias('l')]
+        [string[]]$Location,
+        [Parameter(ValueFromRemainingArguments,ParameterSetName='Default')][string[]]$Match
     )
 
-    $sortProperty = "Path"
-    $sortDescending = $false
 
     $locations = $null
-    if ($null -eq $match) {
-        $locations = Get-ZLocation
+    
+    # We queried the database for locations, and we will return them sorted.
+    # This implements scenario 3.
+    if ($PSCmdlet.ParameterSetName -eq 'GetFilteredPopularPaths') {
+        return Get-ZLocation -Match $Location
     }
-    elseif (($match.Length -gt 0) -and ($match[0] -eq '-l')) {
-        $locations = Get-ZLocation ($match | Select-Object -Skip 1)
-        $sortProperty = "Weight"
-        $sortDescending = $true
-    }
-
-    if ($locations) {
-        $locations |
-            ForEach-Object {$_.GetEnumerator()} |
-            ForEach-Object {[PSCustomObject]@{Weight = $_.Value; Path = $_.Name}} |
-            Sort-Object -Property $sortProperty -Descending:$sortDescending
-        return
+    else {
+        if ($null -eq $Match -or $Match.Count -eq 0) {    
+            return Get-ZLocation
+        }
     }
 
-    Set-ZLocation -match $match
+
+    # This implements scenario 1 and 2, if we did not return before.
+    Set-ZLocation -Match $match
 }
 
 function Get-FrequentFolders {
@@ -246,7 +247,7 @@ function Get-FrequentFolders {
 }
 
 function Clear-NonExistentZLocation {
-    $paths=(Get-ZLocation).Keys
+    $paths = (Get-ZLocation).Path
     foreach ($path in $paths)
     {
         if (!(Test-Path $path)) {

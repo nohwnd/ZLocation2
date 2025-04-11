@@ -89,7 +89,7 @@ Install-Module ZLocation2 -Scope CurrentUser; Import-Module ZLocation2; Add-Cont
 
 If you want to display some additional information about ZLocation on start-up, you can put this snippet in `$PROFILE` after import. 
 ```powershell
-Write-Host -Foreground Green "`n[ZLocation] knows about $((Get-ZLocation).Keys.Count) locations.`n"
+Write-Host -Foreground Green "`n[ZLocation] knows about $((Get-ZLocation).Count) locations.`n"
 ```
 
 ### Note
