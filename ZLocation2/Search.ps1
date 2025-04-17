@@ -4,7 +4,9 @@ if ((Get-Variable IsWindows -ErrorAction Ignore) -eq $null) { $IsWindows = $true
 
 function Find-Matches {
     param (
-        [Parameter(Mandatory=$true)] [Location[]]$Locations, 
+        [Parameter(Mandatory=$true)]
+        [AllowNull()]
+        [Location[]]$Locations, 
         [string[]]$query
     )
 

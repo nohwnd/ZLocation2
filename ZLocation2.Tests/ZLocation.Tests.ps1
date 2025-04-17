@@ -13,7 +13,7 @@ Describe 'ZLocation' {
             try {
                 $testDrive = (Get-PSDrive -Name 'TestDrive').Root
                 
-                $newDirectory = mkdir "$testDrive/newDirectory"
+                $newDirectory = New-Item -ItemType Directory -Path "$testDrive/newDirectory"
                 cd "$testDrive/newDirectory"
 
                 # trigger weight update
@@ -94,7 +94,7 @@ Describe 'ZLocation' {
             $now = (Get-Date)
             # the DB will cut off any time that is smaller than milliseconds, so we round up to whole second
             # because after truncating the now in db might be before the $now in code.
-            $nowTrimmed = $now.Add(-$now.Millisecond) 
+            $nowTrimmed = Get-Date -Date $now -Millisecond 0
             Update-ZLocation 'latest'
 
             # check the default sort by weight, old should be on top
@@ -110,6 +110,56 @@ Describe 'ZLocation' {
             $latestEntry.Path | Should -Be 'latest'
             $latestEntry.LastUsed | Should -BeGreaterThan $nowTrimmed # is not too old
             $latestEntry.LastUsed | Should -BeLessThan $nowTrimmed.AddSeconds(1) # is not too new
+        }
+    }
+
+    Context "Warnings and debug." {
+        
+        BeforeEach {
+            $container = @{ Warning = @(); Debug = @() }
+            Mock Write-Warning { 
+                $container.Warning += $message
+            } -ModuleName ZLocation2
+
+            Mock Write-Debug { 
+                $container.Debug += $message
+            } -ModuleName ZLocation2
+        }
+
+        It "When location is found in db, and is not on disk, warning is shown, and the location is removed from db" {
+
+            $testDrive = (Get-PSDrive -Name 'TestDrive').Root
+            $newDirectory = New-Item -ItemType Directory "$testDrive/will-delete-directory"
+            Invoke-ZLocation $newDirectory
+            # trigger prompt as cmdline would do it when we navigate to new directory
+            prompt > $null
+
+            Set-Location $testDrive
+            # remove the directory from disk, but keep in db
+            Remove-Item -Recurse -Force $newDirectory
+
+            Invoke-ZLocation $newDirectory
+
+            $container.Warning[0] | Should -BeLike 'There is no path *will-delete-directory on the file system. Removing obsolete data from database.'
+            $container.Warning[1] | Should -BeLike "Cannot find matching location for '*will-delete-directory'."
+        }
+
+        It "When location is not found in db, and is not on disk, warning is shown" {
+
+            Set-ZLocation 'non-existing-directory'
+
+            $container.Warning | Should -Be "Cannot find matching location for 'non-existing-directory'."
+        }
+
+        It "When location is not found in db, and it is present on disk, debug is written and we go to the location" {
+
+            $testDrive = (Get-PSDrive -Name 'TestDrive').Root
+            $newDirectory = New-Item -ItemType Directory -Path "$testDrive/existing-directory"
+            Set-ZLocation $newDirectory
+
+            $container.Debug | Should -BeLike "No matches for '*existing-directory', attempting Push-Location."
+
+           "$PWD" | Should -Be "$newDirectory"
         }
     }
 }
