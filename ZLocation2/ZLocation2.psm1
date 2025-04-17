@@ -123,31 +123,32 @@ function Set-ZLocation([Parameter(ValueFromRemainingArguments)][string[]]$match)
         $match = @()
     }
 
-    # Special case to enable Pop-Location.
+    # Handles Pop-Location with 'z -'
     if (($match.Count -eq 1) -and ($match[0] -eq '-')) {
         Pop-ZLocation
         return
     }
 
+    # We find fuzzy matches for the given path, and try to go to the first one,
+    # when we succeed, we are done. If we don't succeed we remove it from the database, and move to the next match if there is any.
     $found = Find-Matches (Get-ZLocationUnsorted) $match
-    $pushDone = $false
     foreach ($m in $found) {
         if (Test-Path $m.Path) {
             Push-Location $m.Path
-            $pushDone = $true
-            break
+
+            return
         } else {
             Write-Warning "There is no path $($m.Path) on the file system. Removing obsolete data from database."
             Remove-ZLocation $m
         }
     }
-    if (-not $pushDone) {
-        if (($found.Count -eq 1) -and (Test-Path $found.Path)) {
-            Write-Debug "No matches for $($match.Path), attempting Push-Location"
-            Push-Location "$match"
-        } else {
-            Write-Warning "Cannot find matching location"
-        }
+
+    # If we did not push to any found location, or all of them did not exist, we try to push to the path that user provided.
+    if ($match.Count -eq 1 -and (Test-Path "$match")) {
+        Write-Debug "No matches for '$match', attempting Push-Location."
+        Push-Location "$match"
+    } else {
+        Write-Warning "Cannot find matching location for '$match'."
     }
 }
 

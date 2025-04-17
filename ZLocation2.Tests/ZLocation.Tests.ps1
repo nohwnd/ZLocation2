@@ -112,4 +112,54 @@ Describe 'ZLocation' {
             $latestEntry.LastUsed | Should -BeLessThan $nowTrimmed.AddSeconds(1) # is not too new
         }
     }
+
+    Context "Warnings and debug." {
+        
+        BeforeEach {
+            $container = @{ Warning = @(); Debug = @() }
+            Mock Write-Warning { 
+                $container.Warning += $message
+            } -ModuleName ZLocation2
+
+            Mock Write-Debug { 
+                $container.Debug += $message
+            } -ModuleName ZLocation2
+        }
+
+        It "When location is found in db, and is not on disk, warning is shown, and the location is removed from db" {
+
+            $testDrive = (Get-PSDrive -Name 'TestDrive').Root
+            $newDirectory = mkdir "$testDrive/will-delete-directory"
+            Invoke-ZLocation $newDirectory
+            # trigger prompt as cmdline would do it when we navigate to new directory
+            prompt > $null
+
+            Set-Location $testDrive
+            # remove the directory from disk, but keep in db
+            Remove-Item -Recurse -Force $newDirectory
+
+            Invoke-ZLocation $newDirectory
+
+            $container.Warning[0] | Should -BeLike 'There is no path *will-delete-directory on the file system. Removing obsolete data from database.'
+            $container.Warning[1] | Should -BeLike "Cannot find matching location for '*will-delete-directory'."
+        }
+
+        It "When location is not found in db, and is not on disk, warning is shown" {
+
+            Set-ZLocation 'non-existing-directory'
+
+            $container.Warning | Should -Be "Cannot find matching location for 'non-existing-directory'."
+        }
+
+        It "When location is not found in db, and it is present on disk, debug is written and we go to the location" {
+
+            $testDrive = (Get-PSDrive -Name 'TestDrive').Root
+            $newDirectory = mkdir "$testDrive/existing-directory"
+            Set-ZLocation $newDirectory
+
+            $container.Debug | Should -BeLike "No matches for '*\existing-directory', attempting Push-Location."
+
+           "$PWD" | Should -Be "$newDirectory"
+        }
+    }
 }
