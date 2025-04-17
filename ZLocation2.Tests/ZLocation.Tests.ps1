@@ -94,7 +94,7 @@ Describe 'ZLocation' {
             $now = (Get-Date)
             # the DB will cut off any time that is smaller than milliseconds, so we round up to whole second
             # because after truncating the now in db might be before the $now in code.
-            $nowTrimmed = $now.Add(-$now.Millisecond) 
+            $nowTrimmed = Get-Date -Date $now -Millisecond 0
             Update-ZLocation 'latest'
 
             # check the default sort by weight, old should be on top
