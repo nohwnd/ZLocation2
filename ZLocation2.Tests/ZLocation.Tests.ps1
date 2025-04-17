@@ -13,7 +13,7 @@ Describe 'ZLocation' {
             try {
                 $testDrive = (Get-PSDrive -Name 'TestDrive').Root
                 
-                $newDirectory = mkdir "$testDrive/newDirectory"
+                $newDirectory = New-Item -ItemType Directory -Path "$testDrive/newDirectory"
                 cd "$testDrive/newDirectory"
 
                 # trigger weight update
@@ -129,7 +129,7 @@ Describe 'ZLocation' {
         It "When location is found in db, and is not on disk, warning is shown, and the location is removed from db" {
 
             $testDrive = (Get-PSDrive -Name 'TestDrive').Root
-            $newDirectory = New-Item -Type Directory "$testDrive/will-delete-directory"
+            $newDirectory = New-Item -ItemType Directory "$testDrive/will-delete-directory"
             Invoke-ZLocation $newDirectory
             # trigger prompt as cmdline would do it when we navigate to new directory
             prompt > $null
@@ -154,7 +154,7 @@ Describe 'ZLocation' {
         It "When location is not found in db, and it is present on disk, debug is written and we go to the location" {
 
             $testDrive = (Get-PSDrive -Name 'TestDrive').Root
-            $newDirectory = mkdir "$testDrive/existing-directory"
+            $newDirectory = New-Item -ItemType Directory -Path "$testDrive/existing-directory"
             Set-ZLocation $newDirectory
 
             $container.Debug | Should -BeLike "No matches for '*\existing-directory', attempting Push-Location."
