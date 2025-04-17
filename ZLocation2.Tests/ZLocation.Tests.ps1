@@ -129,7 +129,7 @@ Describe 'ZLocation' {
         It "When location is found in db, and is not on disk, warning is shown, and the location is removed from db" {
 
             $testDrive = (Get-PSDrive -Name 'TestDrive').Root
-            $newDirectory = mkdir "$testDrive/will-delete-directory"
+            $newDirectory = New-Item -Type Directory "$testDrive/will-delete-directory"
             Invoke-ZLocation $newDirectory
             # trigger prompt as cmdline would do it when we navigate to new directory
             prompt > $null
