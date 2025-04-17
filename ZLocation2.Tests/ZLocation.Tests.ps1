@@ -157,7 +157,7 @@ Describe 'ZLocation' {
             $newDirectory = New-Item -ItemType Directory -Path "$testDrive/existing-directory"
             Set-ZLocation $newDirectory
 
-            $container.Debug | Should -BeLike "No matches for '*\existing-directory', attempting Push-Location."
+            $container.Debug | Should -BeLike "No matches for '*existing-directory', attempting Push-Location."
 
            "$PWD" | Should -Be "$newDirectory"
         }
