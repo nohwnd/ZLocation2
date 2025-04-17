@@ -22,6 +22,7 @@ $configuration.Output.Verbosity = 'Detailed'
 if ($CI) {
     $configuration.Run.Exit = $true
     $configuration.TestResult.Enabled = $true
+    $configuration.TestResult.OutputPath = "$PSScriptRoot/testResults.xml"
 }
 
 Invoke-Pester -Configuration $configuration
